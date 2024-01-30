@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UsePipes, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
@@ -8,8 +8,14 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
-  create(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.create(createBookDto);
+  @UsePipes(ValidationPipe)
+  async create(@Body() createBookDto: CreateBookDto) {
+    try {
+      const book = await this.booksService.create(createBookDto);
+      return { success: true, data: book, message: 'Book created successfully!' };
+    } catch (error) {
+       throw new HttpException({ success: false, message: 'Something went wrong!'}, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get()
