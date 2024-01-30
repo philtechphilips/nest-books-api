@@ -32,7 +32,6 @@ export class BooksController {
   async findOne(@Param('id') id: string) {
     try {
       const book = await this.booksService.findOne(+id);
-
       return { success: true, data: book, message: 'Book fetched successfully!' };
     } catch (error) {
       if (error.status === 404) {
@@ -44,12 +43,31 @@ export class BooksController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.booksService.update(+id, updateBookDto);
+  async update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
+    try {
+      const book = await this.booksService.update(+id, updateBookDto);
+      return { success: true, data: book, message: 'Book updated successfully!' };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException({ success: false, message: 'Something went wrong!' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.booksService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      const book = await this.booksService.remove(+id);
+      return { success: true, data: book, message: 'Book deleted successfully!' };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException({ success: false, message: 'Something went wrong!' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
+
 }
