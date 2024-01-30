@@ -5,7 +5,7 @@ import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
 export class BooksController {
-  constructor(private readonly booksService: BooksService) {}
+  constructor(private readonly booksService: BooksService) { }
 
   @Post()
   @UsePipes(ValidationPipe)
@@ -14,18 +14,33 @@ export class BooksController {
       const book = await this.booksService.create(createBookDto);
       return { success: true, data: book, message: 'Book created successfully!' };
     } catch (error) {
-       throw new HttpException({ success: false, message: 'Something went wrong!'}, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException({ success: false, message: 'Something went wrong!' }, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  async findAll() {
+    try {
+      const books = await this.booksService.findAll();
+      return { success: true, data: books, message: 'Books fetched successfully!' };
+    } catch (error) {
+      throw new HttpException({ success: false, message: 'Something went wrong!' }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.booksService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    try {
+      const book = await this.booksService.findOne(+id);
+
+      return { success: true, data: book, message: 'Book fetched successfully!' };
+    } catch (error) {
+      if (error.status === 404) {
+        throw new HttpException({ success: false, message: 'Book not found!' }, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException({ success: false, message: 'Something went wrong!' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
 
   @Put(':id')
