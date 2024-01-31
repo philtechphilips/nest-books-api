@@ -4,6 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Book } from './entities/book.entity';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { CreateBookDto } from './dto/create-book.dto';
 
 describe('BooksService', () => {
     let service: BooksService;
@@ -67,6 +68,19 @@ describe('BooksService', () => {
             expect(mockRepository.create).toHaveBeenCalledWith(mockBook);
             expect(mockRepository.save).toHaveBeenCalledWith(mockBook);
         });
+
+        it('should throw an error if the book already exists', async () => {
+            const createBookDto: CreateBookDto = {
+              title: 'Test Book',
+              author: 'Test Author',
+              publisher: 'Test Publisher',
+              year: '2022',
+            };
+
+            (mockRepository.findOne as jest.Mock).mockResolvedValue(createBookDto);
+      
+            await expect(service.create(createBookDto)).rejects.toThrowError('This book exist in collection!');
+          });
     });
 
     describe("findAll", () => {

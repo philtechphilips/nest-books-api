@@ -14,7 +14,11 @@ export class BooksController {
       const book = await this.booksService.create(createBookDto);
       return { success: true, data: book, message: 'Book created successfully!' };
     } catch (error) {
-      throw new HttpException({ success: false, message: 'Something went wrong!' }, HttpStatus.INTERNAL_SERVER_ERROR);
+      if(error.status === 400){
+        throw new HttpException({ success: false, message: error.message }, HttpStatus.BAD_REQUEST);
+       }else{
+        throw new HttpException({ success: false, message: 'Something went wrong!' }, HttpStatus.INTERNAL_SERVER_ERROR);
+       }
     }
   }
 
@@ -70,4 +74,5 @@ export class BooksController {
     }
   }
 
+  
 }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,8 +13,16 @@ export class BooksService {
 
   async create(createBookDto: CreateBookDto) {
     try {
-      const book = this.bookRepository.create(createBookDto);
-      return await this.bookRepository.save(book);
+      const book = await this.bookRepository.create(createBookDto);
+      const existingBook = await this.bookRepository.findOne({ where: createBookDto });
+    
+      if (existingBook) {
+        throw new BadRequestException('This book exist in collection!');
+      } else {
+        return await this.bookRepository.save(book);
+      }
+
+
     } catch (error) {
       throw error;
     }
@@ -71,5 +79,4 @@ export class BooksService {
       throw error;
     }
   }
-
 }
