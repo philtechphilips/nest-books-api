@@ -71,3 +71,13 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+## Deployed URL
+
+https://book-api.cyclic.app/
+
+## Postman Documentation
+
+https://documenter.getpostman.com/view/23305592/2s9YytfzwM
+
+https://book-api.cyclic.app/
