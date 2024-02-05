@@ -59,7 +59,6 @@ describe('BooksService', () => {
 
             const mockError = new Error('Failed to create book');
 
-
             mockRepository.create.mockReturnValueOnce(mockBook);
             mockRepository.save.mockRejectedValueOnce(mockError);
 

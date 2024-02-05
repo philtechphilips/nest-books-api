@@ -21,10 +21,7 @@ describe('BookController (e2e)', () => {
                 return Promise.resolve(book);
             }
         }),
-        create: jest.fn().mockImplementation(dto => ({
-            id: 1,
-            ...dto
-        })),
+        create: jest.fn().mockImplementation(dto => dto),
         save: jest.fn().mockImplementation(book => Promise.resolve({ id: 1, ...book })),
         remove: jest.fn().mockResolvedValue({
             id: 1,
@@ -45,29 +42,47 @@ describe('BookController (e2e)', () => {
         await app.init();
     });
 
-    it('/books (POST)', () => {
-        return request(app.getHttpServer())
+    afterAll(async () => {
+        await app.close();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('/books (POST) - Book Created', async () => {
+        const createBookDto = {
+            title: 'Prisoner of Culture',
+            author: 'Mercy Sowande',
+            publisher: 'Book ',
+            year: '2005',
+        };
+
+        (mockBooksRepository.findOne as jest.Mock).mockResolvedValueOnce(null);
+
+        const response = await request(app.getHttpServer())
             .post('/books')
-            .send({
-                title: "The Great Gatsby",
-                author: "F. Scott Fitzgerald",
-                publisher: "Scribner",
-                year: "2004"
-            })
-            .expect(201)
-            .then((response) => {
-                expect(response.body).toEqual({
-                    success: true,
-                    data: {
-                        id: 1,
-                        title: "The Great Gatsby",
-                        author: "F. Scott Fitzgerald",
-                        publisher: "Scribner",
-                        year: "2004"
-                    },
-                    message: 'Book created successfully!',
-                });
-            });
+            .send(createBookDto)
+            .expect(HttpStatus.CREATED);
+        expect(response.body.success).toEqual(true);
+        expect(response.body.data).toEqual({ id: 1, ...createBookDto });
+        expect(response.body.message).toEqual('Book created successfully!');
+    });
+
+    it('/books (POST) - Book Exist in Collection', async () => {
+        const createBookDto = {
+            title: 'Prisoner of Culture',
+            author: 'Mercy Sowande',
+            publisher: 'Book ',
+            year: '2005',
+        };
+
+        const response = await request(app.getHttpServer())
+            .post('/books')
+            .send(createBookDto)
+            .expect(HttpStatus.BAD_REQUEST);
+        expect(response.body.success).toEqual(false);
+        expect(response.body.message).toEqual('This book exist in collection!');
     });
 
     it('/books (GET All BOOKS)', () => {
